@@ -1,0 +1,37 @@
+{
+  "name": "menu-builder-server",
+  "version": "1.0.0",
+  "description": "Backend API for Menu Builder application",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "dev": "nodemon index.js",
+    "test": "jest"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "cors": "^2.8.5",
+    "helmet": "^7.1.0",
+    "morgan": "^1.10.0",
+    "dotenv": "^16.3.1",
+    "mongoose": "^8.0.3",
+    "multer": "^1.4.5-lts.1",
+    "sharp": "^0.33.1",
+    "qrcode": "^1.5.3",
+    "puppeteer": "^21.6.1",
+    "nanoid": "^3.3.7",
+    "express-rate-limit": "^7.1.5",
+    "compression": "^1.7.4",
+    "bcryptjs": "^2.4.3",
+    "jsonwebtoken": "^9.0.2",
+    "express-validator": "^7.0.1"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.2",
+    "jest": "^29.7.0",
+    "supertest": "^6.3.3"
+  },
+  "keywords": ["api", "express", "menu", "food-truck"],
+  "author": "",
+  "license": "MIT"
+}
