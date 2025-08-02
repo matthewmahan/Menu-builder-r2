@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
-import { FiPlus, FiEdit3, FiTrash2, FiMove, FiEye, FiSave, FiSettings } from 'react-icons/fi';
+import { FiPlus, FiEdit3, FiTrash2, FiMove, FiEye, FiSettings } from 'react-icons/fi';
 import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors } from '@dnd-kit/core';
 import { arrayMove, SortableContext, sortableKeyboardCoordinates, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import { useMenu } from '../contexts/MenuContext';
 import LoadingSpinner from '../components/LoadingSpinner';
+import MenuItemModal from '../components/MenuItemModal';
 
 const EditorContainer = styled.div`
   flex: 1;
@@ -100,13 +101,6 @@ const EditorContent = styled.div`
   background: ${props => props.theme.colors.background.primary};
 `;
 
-const SectionTitle = styled.h2`
-  font-size: ${props => props.theme.fontSizes.lg};
-  margin-bottom: ${props => props.theme.spacing.md};
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-`;
 
 const AddButton = styled(Button)`
   background: ${props => props.theme.colors.success.main};
@@ -241,7 +235,7 @@ const MenuEditor = () => {
   const navigate = useNavigate();
   const { currentMenu, loading, fetchMenu, addMenuItem, updateMenuItem, deleteMenuItem, reorderMenuItems } = useMenu();
   
-  const [isEditing, setIsEditing] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingItem, setEditingItem] = useState(null);
 
   const sensors = useSensors(
@@ -271,20 +265,35 @@ const MenuEditor = () => {
     }
   };
 
-  const handleAddItem = () => {
-    setEditingItem({
-      name: '',
-      description: '',
-      price: '',
-      category: 'Main Dishes',
-      image: null
-    });
-    setIsEditing(true);
+  const handleAddItem = (category = null) => {
+    setEditingItem(null);
+    setIsModalOpen(true);
   };
 
   const handleEditItem = (item) => {
     setEditingItem(item);
-    setIsEditing(true);
+    setIsModalOpen(true);
+  };
+
+  const handleSaveItem = async (itemData) => {
+    try {
+      if (editingItem) {
+        // Update existing item
+        await updateMenuItem(menuId, editingItem._id, itemData);
+      } else {
+        // Add new item
+        await addMenuItem(menuId, itemData);
+      }
+      setIsModalOpen(false);
+      setEditingItem(null);
+    } catch (error) {
+      console.error('Error saving menu item:', error);
+    }
+  };
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+    setEditingItem(null);
   };
 
   const handleDeleteItem = async (itemId) => {
@@ -399,7 +408,7 @@ const MenuEditor = () => {
               <CategorySection key={categoryName}>
                 <CategoryHeader>
                   <CategoryName>{categoryName}</CategoryName>
-                  <AddButton onClick={handleAddItem}>
+                  <AddButton onClick={() => handleAddItem(categoryName)}>
                     <FiPlus />
                     Add Item
                   </AddButton>
@@ -442,7 +451,7 @@ const MenuEditor = () => {
                 ) : (
                   <EmptyState>
                     <p>No items in this category yet.</p>
-                    <AddButton onClick={handleAddItem}>
+                    <AddButton onClick={() => handleAddItem(categoryName)}>
                       <FiPlus />
                       Add First Item
                     </AddButton>
@@ -453,6 +462,18 @@ const MenuEditor = () => {
           </DndContext>
         </EditorContent>
       </MainEditor>
+
+      <MenuItemModal
+        isOpen={isModalOpen}
+        onClose={handleCloseModal}
+        onSave={handleSaveItem}
+        editingItem={editingItem}
+        categories={currentMenu?.categories || [
+          { name: 'Main Dishes', order: 0 },
+          { name: 'Sides', order: 1 },
+          { name: 'Beverages', order: 2 }
+        ]}
+      />
     </EditorContainer>
   );
 };

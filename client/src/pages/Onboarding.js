@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
-import { FiArrowLeft, FiArrowRight, FiCheck, FiUpload, FiMenu } from 'react-icons/fi';
+import { FiArrowLeft, FiArrowRight, FiCheck, FiUpload, FiMenu, FiPlus } from 'react-icons/fi';
 import { useAuth } from '../contexts/AuthContext';
 import { useMenu } from '../contexts/MenuContext';
 import LoadingSpinner from '../components/LoadingSpinner';
@@ -210,6 +210,90 @@ const SkipButton = styled.button`
   }
 `;
 
+const MenuItemsForm = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: ${props => props.theme.spacing.md};
+  max-width: 500px;
+  margin: 0 auto;
+`;
+
+const MenuItemRow = styled.div`
+  display: grid;
+  grid-template-columns: 2fr 2fr 1fr 1fr auto;
+  gap: ${props => props.theme.spacing.sm};
+  align-items: center;
+  padding: ${props => props.theme.spacing.sm};
+  background: ${props => props.theme.colors.background.secondary};
+  border-radius: ${props => props.theme.borderRadius.md};
+`;
+
+const MenuItemInput = styled.input`
+  padding: ${props => props.theme.spacing.sm};
+  border: 1px solid ${props => props.theme.colors.border.light};
+  border-radius: ${props => props.theme.borderRadius.sm};
+  font-size: ${props => props.theme.fontSizes.sm};
+
+  &:focus {
+    outline: none;
+    border-color: ${props => props.theme.colors.primary.main};
+  }
+`;
+
+const MenuItemPriceInput = styled(MenuItemInput)`
+  text-align: right;
+`;
+
+const MenuItemSelect = styled.select`
+  padding: ${props => props.theme.spacing.sm};
+  border: 1px solid ${props => props.theme.colors.border.light};
+  border-radius: ${props => props.theme.borderRadius.sm};
+  font-size: ${props => props.theme.fontSizes.sm};
+  background: white;
+
+  &:focus {
+    outline: none;
+    border-color: ${props => props.theme.colors.primary.main};
+  }
+`;
+
+const RemoveButton = styled.button`
+  width: 24px;
+  height: 24px;
+  border: none;
+  border-radius: 50%;
+  background: ${props => props.theme.colors.error.main};
+  color: white;
+  cursor: pointer;
+  font-size: ${props => props.theme.fontSizes.sm};
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  &:hover {
+    background: ${props => props.theme.colors.error.dark};
+  }
+`;
+
+const AddItemButton = styled.button`
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: ${props => props.theme.spacing.sm};
+  padding: ${props => props.theme.spacing.md};
+  border: 2px dashed ${props => props.theme.colors.border.medium};
+  border-radius: ${props => props.theme.borderRadius.md};
+  background: transparent;
+  color: ${props => props.theme.colors.text.secondary};
+  cursor: pointer;
+  transition: ${props => props.theme.transitions.normal};
+
+  &:hover {
+    border-color: ${props => props.theme.colors.primary.main};
+    color: ${props => props.theme.colors.primary.main};
+  }
+`;
+
 const Onboarding = () => {
   const navigate = useNavigate();
   const { user, updateOnboarding } = useAuth();
@@ -221,10 +305,11 @@ const Onboarding = () => {
     businessName: user?.businessName || '',
     tagline: '',
     description: '',
-    logo: null
+    logo: null,
+    menuItems: []
   });
 
-  const totalSteps = 5;
+  const totalSteps = 6;
 
   useEffect(() => {
     if (user?.onboardingStep) {
@@ -248,6 +333,36 @@ const Onboarding = () => {
         logo: file
       }));
     }
+  };
+
+  const handleAddMenuItem = () => {
+    const newItem = {
+      id: Date.now(),
+      name: '',
+      description: '',
+      price: '',
+      category: 'Main Dishes'
+    };
+    setFormData(prev => ({
+      ...prev,
+      menuItems: [...prev.menuItems, newItem]
+    }));
+  };
+
+  const handleUpdateMenuItem = (id, field, value) => {
+    setFormData(prev => ({
+      ...prev,
+      menuItems: prev.menuItems.map(item =>
+        item.id === id ? { ...item, [field]: value } : item
+      )
+    }));
+  };
+
+  const handleRemoveMenuItem = (id) => {
+    setFormData(prev => ({
+      ...prev,
+      menuItems: prev.menuItems.filter(item => item.id !== id)
+    }));
   };
 
   const handleNext = async () => {
@@ -281,12 +396,21 @@ const Onboarding = () => {
 
   const completeOnboarding = async () => {
     try {
-      // Create the first menu
+      // Create the first menu with items
+      const menuItems = formData.menuItems
+        .filter(item => item.name.trim() && item.price)
+        .map(item => ({
+          name: item.name.trim(),
+          description: item.description.trim(),
+          price: parseFloat(item.price),
+          category: item.category
+        }));
+
       const menuResult = await createMenu({
         businessName: formData.businessName,
         tagline: formData.tagline,
         description: formData.description,
-        items: [],
+        items: menuItems,
         categories: [
           { name: 'Main Dishes', order: 0 },
           { name: 'Sides', order: 1 },
@@ -434,12 +558,68 @@ const Onboarding = () => {
         return (
           <>
             <StepIcon>
+              <FiMenu />
+            </StepIcon>
+            <StepTitle>Add your first menu items</StepTitle>
+            <StepDescription>
+              Let's add a few items to get your menu started. You can always add more later!
+            </StepDescription>
+            <MenuItemsForm>
+              {formData.menuItems.map((item) => (
+                <MenuItemRow key={item.id}>
+                  <MenuItemInput
+                    type="text"
+                    placeholder="Item name"
+                    value={item.name}
+                    onChange={(e) => handleUpdateMenuItem(item.id, 'name', e.target.value)}
+                  />
+                  <MenuItemInput
+                    type="text"
+                    placeholder="Description (optional)"
+                    value={item.description}
+                    onChange={(e) => handleUpdateMenuItem(item.id, 'description', e.target.value)}
+                  />
+                  <MenuItemPriceInput
+                    type="number"
+                    step="0.01"
+                    placeholder="Price"
+                    value={item.price}
+                    onChange={(e) => handleUpdateMenuItem(item.id, 'price', e.target.value)}
+                  />
+                  <MenuItemSelect
+                    value={item.category}
+                    onChange={(e) => handleUpdateMenuItem(item.id, 'category', e.target.value)}
+                  >
+                    <option value="Main Dishes">Main Dishes</option>
+                    <option value="Sides">Sides</option>
+                    <option value="Beverages">Beverages</option>
+                  </MenuItemSelect>
+                  <RemoveButton
+                    type="button"
+                    onClick={() => handleRemoveMenuItem(item.id)}
+                  >
+                    ×
+                  </RemoveButton>
+                </MenuItemRow>
+              ))}
+              <AddItemButton type="button" onClick={handleAddMenuItem}>
+                <FiPlus />
+                Add Menu Item
+              </AddItemButton>
+            </MenuItemsForm>
+          </>
+        );
+
+      case 6:
+        return (
+          <>
+            <StepIcon>
               <FiCheck />
             </StepIcon>
             <StepTitle>You're all set!</StepTitle>
             <StepDescription>
-              Great! We'll now create your first menu with some default categories. 
-              You can start adding your delicious items right away.
+              Perfect! We'll now create your digital menu with {formData.menuItems.filter(item => item.name.trim()).length} items.
+              You can always add more items and customize your menu later.
             </StepDescription>
           </>
         );
