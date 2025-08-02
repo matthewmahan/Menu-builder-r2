@@ -13,7 +13,8 @@ import Footer from './components/Footer';
 import Home from './pages/Home';
 import Login from './pages/Login';
 import Register from './pages/Register';
-import Dashboard from './pages/Dashboard';
+import MenuManagement from './pages/MenuManagement';
+import MenuManagementDemo from './pages/MenuManagementDemo';
 import Onboarding from './pages/Onboarding';
 import MenuEditor from './pages/MenuEditor';
 import MenuPreview from './pages/MenuPreview';
@@ -41,9 +42,17 @@ function App() {
                 <Route path="/dashboard" element={
                   <ProtectedRoute>
                     <Navbar />
-                    <Dashboard />
+                    <MenuManagement />
                     <Footer />
                   </ProtectedRoute>
+                } />
+                
+                <Route path="/demo" element={
+                  <>
+                    <Navbar />
+                    <MenuManagementDemo />
+                    <Footer />
+                  </>
                 } />
                 
                 <Route path="/onboarding" element={

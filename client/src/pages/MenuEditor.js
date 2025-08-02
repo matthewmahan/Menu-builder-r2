@@ -453,7 +453,7 @@ const MenuEditor = () => {
                     <p>No items in this category yet.</p>
                     <AddButton onClick={() => handleAddItem(categoryName)}>
                       <FiPlus />
-                      Add First Item
+                      Add Item
                     </AddButton>
                   </EmptyState>
                 )}

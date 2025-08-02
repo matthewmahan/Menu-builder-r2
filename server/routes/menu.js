@@ -30,29 +30,20 @@ const handleValidationErrors = (req, res, next) => {
   next();
 };
 
-// GET /api/menus - Get all menus (for admin or user's own menus)
+// GET /api/menus - Get user's menu (single menu per user)
 router.get('/', async (req, res) => {
   try {
-    const { page = 1, limit = 10, search } = req.query;
-    const query = {};
-    
-    if (search) {
-      query.$text = { $search: search };
-    }
-
-    const menus = await Menu.find(query)
+    // For now, we'll return all menus to maintain compatibility
+    // In a real implementation, you'd get the user from authentication middleware
+    const menus = await Menu.find({})
       .select('-versions') // Exclude versions for performance
-      .sort({ createdAt: -1 })
-      .limit(limit * 1)
-      .skip((page - 1) * limit);
-
-    const total = await Menu.countDocuments(query);
+      .sort({ createdAt: -1 });
 
     res.json({
       menus,
-      totalPages: Math.ceil(total / limit),
-      currentPage: page,
-      total
+      totalPages: 1,
+      currentPage: 1,
+      total: menus.length
     });
   } catch (error) {
     console.error('Error fetching menus:', error);

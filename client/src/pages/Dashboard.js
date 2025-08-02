@@ -212,7 +212,7 @@ const LoadingContainer = styled.div`
 const Dashboard = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
-  const { menus, loading, fetchMenus, deleteMenu, toggleMenuStatus } = useMenu();
+  const { menus, loading, fetchMenus, deleteMenu } = useMenu();
 
   useEffect(() => {
     fetchMenus();
@@ -242,7 +242,6 @@ const Dashboard = () => {
 
 
   const totalItems = menus.reduce((sum, menu) => sum + (menu.items?.length || 0), 0);
-  const activeMenus = menus.filter(menu => menu.isOpen).length;
 
   if (loading && menus.length === 0) {
     return (
@@ -261,24 +260,26 @@ const Dashboard = () => {
           <Title>Welcome back, {user?.businessName || user?.ownerName || 'there'}!</Title>
           <WelcomeText>Manage your digital menus and track your business</WelcomeText>
         </div>
-        <CreateButton onClick={handleCreateMenu}>
-          <FiPlus />
-          Create New Menu
-        </CreateButton>
+        {menus.length === 0 && (
+          <CreateButton onClick={handleCreateMenu}>
+            <FiPlus />
+            Create Menu
+          </CreateButton>
+        )}
       </Header>
 
       <StatsGrid>
         <StatCard>
-          <StatValue>{menus.length}</StatValue>
-          <StatLabel>Total Menus</StatLabel>
+          <StatValue>{menus.length > 0 ? 'Active' : 'None'}</StatValue>
+          <StatLabel>Menu Status</StatLabel>
         </StatCard>
         <StatCard>
           <StatValue>{totalItems}</StatValue>
           <StatLabel>Menu Items</StatLabel>
         </StatCard>
         <StatCard>
-          <StatValue>{activeMenus}</StatValue>
-          <StatLabel>Active Menus</StatLabel>
+          <StatValue>{menus.length > 0 ? (menus[0].isOpen ? 'Open' : 'Closed') : 'N/A'}</StatValue>
+          <StatLabel>Current Status</StatLabel>
         </StatCard>
         <StatCard>
           <StatValue>{user?.subscription?.plan || 'Free'}</StatValue>
@@ -288,11 +289,11 @@ const Dashboard = () => {
 
       <MenusSection>
         <SectionTitle>
-          Your Menus
+          Your Menu
           {menus.length > 0 && (
-            <CreateButton onClick={handleCreateMenu}>
+            <CreateButton onClick={() => handleEditMenu(menus[0]._id)}>
               <FiPlus />
-              Add Menu
+              Add Item
             </CreateButton>
           )}
         </SectionTitle>
@@ -300,11 +301,11 @@ const Dashboard = () => {
         {menus.length === 0 ? (
           <EmptyState>
             <EmptyStateIcon>🍽️</EmptyStateIcon>
-            <h3>No menus yet</h3>
-            <p>Create your first digital menu to get started!</p>
+            <h3>No menu yet</h3>
+            <p>Create your digital menu to get started!</p>
             <CreateButton onClick={handleCreateMenu} style={{ marginTop: '1rem' }}>
               <FiPlus />
-              Create Your First Menu
+              Create Your Menu
             </CreateButton>
           </EmptyState>
         ) : (

@@ -101,6 +101,11 @@ const themeSchema = new mongoose.Schema({
 });
 
 const menuSchema = new mongoose.Schema({
+  owner: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
+    required: true
+  },
   businessName: {
     type: String,
     required: true,

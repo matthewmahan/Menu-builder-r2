@@ -193,12 +193,7 @@ const Navbar = () => {
       </Logo>
 
       <NavLinks>
-        <NavLink 
-          to="/dashboard" 
-          className={isActiveLink('/dashboard') ? 'active' : ''}
-        >
-          Dashboard
-        </NavLink>
+        {/* Dashboard link moved to sidebar */}
       </NavLinks>
 
       <UserMenu>

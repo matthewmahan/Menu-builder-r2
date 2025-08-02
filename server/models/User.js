@@ -96,6 +96,11 @@ const userSchema = new mongoose.Schema({
       default: 'America/New_York'
     }
   },
+  menu: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Menu',
+    default: null
+  },
   lastLoginAt: {
     type: Date,
     default: null
@@ -137,18 +142,16 @@ userSchema.methods.updateLoginInfo = function() {
   return this.save();
 };
 
-// Check if user can create more menus based on subscription
+// Check if user can create a menu (only one menu per user)
 userSchema.methods.canCreateMenu = async function() {
+  return !this.menu; // User can only create a menu if they don't have one
+};
+
+// Get user's menu
+userSchema.methods.getMenu = async function() {
+  if (!this.menu) return null;
   const Menu = mongoose.model('Menu');
-  const menuCount = await Menu.countDocuments({ owner: this._id });
-  
-  const limits = {
-    free: 1,
-    pro: 10,
-    enterprise: Infinity
-  };
-  
-  return menuCount < limits[this.subscription.plan];
+  return await Menu.findById(this.menu);
 };
 
 // Virtual for full name
