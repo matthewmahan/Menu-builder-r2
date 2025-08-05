@@ -1,7 +1,7 @@
 import React from 'react';
-import { Link, useNavigate, useLocation } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
-import { FiMenu, FiUser, FiSettings, FiLogOut, FiHome } from 'react-icons/fi';
+import { FiMenu, FiSettings, FiLogOut, FiHome } from 'react-icons/fi';
 import { useAuth } from '../contexts/AuthContext';
 
 const NavbarContainer = styled.nav`
@@ -46,7 +46,7 @@ const NavLinks = styled.div`
 `;
 
 const NavLink = styled(Link)`
-  color: ${props => props.theme.colors.text.secondary};
+  color: ${props => props.theme.colors.text.primary};
   text-decoration: none;
   font-weight: ${props => props.theme.fontWeights.medium};
   padding: ${props => props.theme.spacing.sm} ${props => props.theme.spacing.md};
@@ -54,7 +54,7 @@ const NavLink = styled(Link)`
   transition: ${props => props.theme.transitions.normal};
 
   &:hover {
-    color: ${props => props.theme.colors.text.primary};
+    color: ${props => props.theme.colors.primary.main};
     background: ${props => props.theme.colors.background.secondary};
     text-decoration: none;
   }
@@ -62,6 +62,7 @@ const NavLink = styled(Link)`
   &.active {
     color: ${props => props.theme.colors.primary.main};
     background: ${props => props.theme.colors.primary.light}22;
+    font-weight: ${props => props.theme.fontWeights.semibold};
   }
 `;
 
@@ -157,7 +158,6 @@ const DropdownItem = styled.button`
 const Navbar = () => {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
-  const location = useLocation();
   const [dropdownOpen, setDropdownOpen] = React.useState(false);
 
   const handleLogout = () => {
@@ -181,10 +181,6 @@ const Navbar = () => {
     return name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
   };
 
-  const isActiveLink = (path) => {
-    return location.pathname === path || location.pathname.startsWith(path + '/');
-  };
-
   return (
     <NavbarContainer>
       <Logo to="/dashboard">
@@ -193,7 +189,7 @@ const Navbar = () => {
       </Logo>
 
       <NavLinks>
-        {/* Dashboard link moved to sidebar */}
+        {/* Navigation moved to sidebar - app header only contains logo and user menu */}
       </NavLinks>
 
       <UserMenu>

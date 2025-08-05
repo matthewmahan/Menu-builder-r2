@@ -6,6 +6,7 @@ import theme from './styles/theme';
 import { AuthProvider } from './contexts/AuthContext';
 import { MenuProvider } from './contexts/MenuContext';
 import ProtectedRoute from './components/ProtectedRoute';
+import AppLayout from './components/AppLayout';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 
@@ -13,6 +14,7 @@ import Footer from './components/Footer';
 import Home from './pages/Home';
 import Login from './pages/Login';
 import Register from './pages/Register';
+import Dashboard from './pages/Dashboard';
 import MenuManagement from './pages/MenuManagement';
 import MenuManagementDemo from './pages/MenuManagementDemo';
 import Onboarding from './pages/Onboarding';
@@ -41,18 +43,24 @@ function App() {
                 {/* Protected routes */}
                 <Route path="/dashboard" element={
                   <ProtectedRoute>
-                    <Navbar />
-                    <MenuManagement />
-                    <Footer />
+                    <AppLayout>
+                      <Dashboard />
+                    </AppLayout>
+                  </ProtectedRoute>
+                } />
+                
+                <Route path="/menu-management" element={
+                  <ProtectedRoute>
+                    <AppLayout>
+                      <MenuManagement />
+                    </AppLayout>
                   </ProtectedRoute>
                 } />
                 
                 <Route path="/demo" element={
-                  <>
-                    <Navbar />
+                  <AppLayout>
                     <MenuManagementDemo />
-                    <Footer />
-                  </>
+                  </AppLayout>
                 } />
                 
                 <Route path="/onboarding" element={
@@ -63,9 +71,9 @@ function App() {
                 
                 <Route path="/menu-editor/:menuId?" element={
                   <ProtectedRoute>
-                    <Navbar />
-                    <MenuEditor />
-                    <Footer />
+                    <AppLayout>
+                      <MenuEditor />
+                    </AppLayout>
                   </ProtectedRoute>
                 } />
                 
@@ -75,19 +83,19 @@ function App() {
                   </ProtectedRoute>
                 } />
                 
-                <Route path="/qr-generator/:menuId" element={
+                <Route path="/qr-generator/:menuId?" element={
                   <ProtectedRoute>
-                    <Navbar />
-                    <QRGenerator />
-                    <Footer />
+                    <AppLayout>
+                      <QRGenerator />
+                    </AppLayout>
                   </ProtectedRoute>
                 } />
                 
                 <Route path="/settings" element={
                   <ProtectedRoute>
-                    <Navbar />
-                    <Settings />
-                    <Footer />
+                    <AppLayout>
+                      <Settings />
+                    </AppLayout>
                   </ProtectedRoute>
                 } />
                 

@@ -1,48 +1,37 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
-import { FiPlus, FiEdit3, FiTrash2, FiGrid, FiSettings, FiMoreVertical, FiEyeOff, FiEye, FiAlertCircle } from 'react-icons/fi';
+import {
+  FiPlus,
+  FiEdit3,
+  FiTrash2,
+  FiGrid,
+  FiSettings,
+  FiMoreVertical,
+  FiEyeOff,
+  FiEye,
+  FiAlertCircle,
+  FiTrendingUp,
+  FiUsers,
+  FiClock,
+  FiDollarSign,
+  FiBarChart2,
+  FiCalendar,
+  FiActivity,
+  FiToggleLeft,
+  FiToggleRight
+} from 'react-icons/fi';
 import { Link } from 'react-router-dom';
 import { useMenu } from '../contexts/MenuContext';
+import { useAuth } from '../contexts/AuthContext';
 import LoadingSpinner from '../components/LoadingSpinner';
 import MenuItemModal from '../components/MenuItemModal';
 
 const ManagementContainer = styled.div`
-  display: flex;
-  height: calc(100vh - 64px);
-`;
-
-const Sidebar = styled.div`
-  width: 280px;
-  background: ${props => props.theme.colors.background.secondary};
-  border-right: 1px solid ${props => props.theme.colors.border.light};
-  padding: ${props => props.theme.spacing.lg};
+  flex: 1;
   display: flex;
   flex-direction: column;
-  gap: ${props => props.theme.spacing.lg};
-`;
-
-const SidebarLink = styled(Link)`
-  display: flex;
-  align-items: center;
-  gap: ${props => props.theme.spacing.sm};
-  padding: ${props => props.theme.spacing.md} ${props => props.theme.spacing.lg};
-  background: ${props => props.primary ? props.theme.colors.primary.main : 'white'};
-  color: ${props => props.primary ? 'white' : props.theme.colors.text.primary};
-  border: 1px solid ${props => props.primary ? props.theme.colors.primary.main : props.theme.colors.border.medium};
-  border-radius: ${props => props.theme.borderRadius.md};
-  font-weight: ${props => props.theme.fontWeights.medium};
-  cursor: pointer;
-  transition: ${props => props.theme.transitions.normal};
-  justify-content: center;
-  text-decoration: none;
-
-  &:hover {
-    background: ${props => props.primary ? props.theme.colors.primary.dark : props.theme.colors.background.secondary};
-    transform: translateY(-1px);
-    text-decoration: none;
-    color: ${props => props.primary ? 'white' : props.theme.colors.text.primary};
-  }
+  overflow: hidden;
 `;
 
 const MainContent = styled.div`
@@ -317,12 +306,223 @@ const LoadingContainer = styled.div`
   height: 400px;
 `;
 
+// Dashboard Components
+const DashboardOverview = styled.div`
+  background: white;
+  border-radius: ${props => props.theme.borderRadius.lg};
+  padding: ${props => props.theme.spacing.xl};
+  margin-bottom: ${props => props.theme.spacing.lg};
+  box-shadow: ${props => props.theme.shadows.sm};
+  border: 1px solid ${props => props.theme.colors.border.light};
+`;
+
+const OverviewTitle = styled.h2`
+  font-size: ${props => props.theme.fontSizes.xl};
+  margin-bottom: ${props => props.theme.spacing.lg};
+  display: flex;
+  align-items: center;
+  gap: ${props => props.theme.spacing.sm};
+`;
+
+const StatsGrid = styled.div`
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: ${props => props.theme.spacing.lg};
+  margin-bottom: ${props => props.theme.spacing.xl};
+`;
+
+const StatCard = styled.div`
+  background: ${props => props.theme.colors.background.secondary};
+  border-radius: ${props => props.theme.borderRadius.md};
+  padding: ${props => props.theme.spacing.lg};
+  text-align: center;
+  border: 1px solid ${props => props.theme.colors.border.light};
+`;
+
+const StatValue = styled.div`
+  font-size: ${props => props.theme.fontSizes.xxl};
+  font-weight: ${props => props.theme.fontWeights.bold};
+  color: ${props => props.theme.colors.primary.main};
+  margin-bottom: ${props => props.theme.spacing.xs};
+`;
+
+const StatLabel = styled.div`
+  color: ${props => props.theme.colors.text.secondary};
+  font-size: ${props => props.theme.fontSizes.sm};
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: ${props => props.theme.spacing.xs};
+`;
+
+const QuickActionsGrid = styled.div`
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: ${props => props.theme.spacing.lg};
+  margin-bottom: ${props => props.theme.spacing.xl};
+`;
+
+const QuickActionCard = styled.div`
+  background: white;
+  border-radius: ${props => props.theme.borderRadius.md};
+  padding: ${props => props.theme.spacing.lg};
+  border: 1px solid ${props => props.theme.colors.border.light};
+  cursor: pointer;
+  transition: ${props => props.theme.transitions.normal};
+
+  &:hover {
+    box-shadow: ${props => props.theme.shadows.md};
+    transform: translateY(-2px);
+  }
+`;
+
+const QuickActionIcon = styled.div`
+  width: 48px;
+  height: 48px;
+  border-radius: ${props => props.theme.borderRadius.md};
+  background: ${props => props.theme.colors.primary.light}22;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: ${props => props.theme.colors.primary.main};
+  margin-bottom: ${props => props.theme.spacing.md};
+`;
+
+const QuickActionTitle = styled.h3`
+  font-size: ${props => props.theme.fontSizes.md};
+  margin-bottom: ${props => props.theme.spacing.xs};
+`;
+
+const QuickActionDescription = styled.p`
+  color: ${props => props.theme.colors.text.secondary};
+  font-size: ${props => props.theme.fontSizes.sm};
+  margin: 0;
+`;
+
+const RecentActivitySection = styled.div`
+  background: white;
+  border-radius: ${props => props.theme.borderRadius.lg};
+  padding: ${props => props.theme.spacing.xl};
+  margin-bottom: ${props => props.theme.spacing.lg};
+  box-shadow: ${props => props.theme.shadows.sm};
+  border: 1px solid ${props => props.theme.colors.border.light};
+`;
+
+const ActivityItem = styled.div`
+  display: flex;
+  align-items: center;
+  gap: ${props => props.theme.spacing.md};
+  padding: ${props => props.theme.spacing.md} 0;
+  border-bottom: 1px solid ${props => props.theme.colors.border.light};
+
+  &:last-child {
+    border-bottom: none;
+  }
+`;
+
+const ActivityIcon = styled.div`
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: ${props => props.theme.colors.background.secondary};
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: ${props => props.theme.colors.text.secondary};
+`;
+
+const ActivityContent = styled.div`
+  flex: 1;
+`;
+
+const ActivityText = styled.div`
+  font-size: ${props => props.theme.fontSizes.sm};
+  color: ${props => props.theme.colors.text.primary};
+`;
+
+const ActivityTime = styled.div`
+  font-size: ${props => props.theme.fontSizes.xs};
+  color: ${props => props.theme.colors.text.secondary};
+  margin-top: ${props => props.theme.spacing.xs};
+`;
+
+const MenuStatusToggle = styled.div`
+  display: flex;
+  align-items: center;
+  gap: ${props => props.theme.spacing.md};
+  padding: ${props => props.theme.spacing.lg};
+  background: ${props => props.isOpen ? props.theme.colors.success.light + '22' : props.theme.colors.error.light + '22'};
+  border-radius: ${props => props.theme.borderRadius.md};
+  border: 1px solid ${props => props.isOpen ? props.theme.colors.success.light : props.theme.colors.error.light};
+  margin-bottom: ${props => props.theme.spacing.lg};
+`;
+
+const StatusText = styled.div`
+  flex: 1;
+`;
+
+const StatusTitle = styled.div`
+  font-weight: ${props => props.theme.fontWeights.semibold};
+  color: ${props => props.isOpen ? props.theme.colors.success.dark : props.theme.colors.error.dark};
+`;
+
+const StatusDescription = styled.div`
+  font-size: ${props => props.theme.fontSizes.sm};
+  color: ${props => props.theme.colors.text.secondary};
+`;
+
+const ToggleButton = styled.button`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 28px;
+  border: none;
+  border-radius: ${props => props.theme.borderRadius.full};
+  background: ${props => props.active ? props.theme.colors.success.main : props.theme.colors.border.medium};
+  color: white;
+  cursor: pointer;
+  transition: ${props => props.theme.transitions.normal};
+  position: relative;
+
+  &:hover {
+    background: ${props => props.active ? props.theme.colors.success.dark : props.theme.colors.border.dark};
+  }
+
+  &::after {
+    content: '';
+    position: absolute;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: white;
+    transition: ${props => props.theme.transitions.normal};
+    transform: translateX(${props => props.active ? '10px' : '-10px'});
+  }
+`;
+
 const MenuManagement = () => {
   const navigate = useNavigate();
-  const { menus, currentMenu, loading, fetchMenus, fetchMenu, deleteMenuItem, addMenuItem, updateMenuItem } = useMenu();
+  const { user } = useAuth();
+  const { menus, currentMenu, loading, fetchMenus, fetchMenu, deleteMenuItem, addMenuItem, updateMenuItem, toggleMenuStatus } = useMenu();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingItem, setEditingItem] = useState(null);
   const [openDropdown, setOpenDropdown] = useState(null);
+  
+  // Mock dashboard data (placeholder)
+  const [dashboardData] = useState({
+    totalViews: 1247,
+    todayViews: 89,
+    weeklyOrders: 156,
+    monthlyRevenue: 3420,
+    popularItems: ['Margherita Pizza', 'Caesar Salad', 'Chocolate Cake'],
+    recentActivity: [
+      { type: 'item_added', text: 'Added "Truffle Pasta" to menu', time: '2 hours ago', icon: FiPlus },
+      { type: 'menu_updated', text: 'Updated menu prices', time: '1 day ago', icon: FiEdit3 },
+      { type: 'item_sold_out', text: 'Marked "Fish & Chips" as sold out', time: '2 days ago', icon: FiAlertCircle },
+      { type: 'menu_viewed', text: '23 customers viewed your menu', time: '3 days ago', icon: FiEye }
+    ]
+  });
 
   useEffect(() => {
     fetchMenus();
@@ -363,6 +563,35 @@ const MenuManagement = () => {
     // This would need backend support to update item status
     console.log('Toggle active for:', item.name);
     setOpenDropdown(null);
+  };
+
+  const handleToggleMenuStatus = async () => {
+    if (currentMenu) {
+      await toggleMenuStatus(currentMenu._id);
+    }
+  };
+
+  const handleQuickAction = (action) => {
+    switch (action) {
+      case 'add-item':
+        handleAddItem();
+        break;
+      case 'qr-code':
+        if (currentMenu) {
+          navigate(`/qr-generator/${currentMenu._id}`);
+        }
+        break;
+      case 'preview':
+        if (currentMenu) {
+          navigate(`/menu-preview/${currentMenu._id}`);
+        }
+        break;
+      case 'settings':
+        navigate('/settings');
+        break;
+      default:
+        break;
+    }
   };
 
   const handleCloseModal = () => {
@@ -427,25 +656,133 @@ const MenuManagement = () => {
 
   return (
     <ManagementContainer>
-      <Sidebar>
-        <h3>Menu Tools</h3>
-        <SidebarLink to="/demo">
-          <FiGrid />
-          Dashboard
-        </SidebarLink>
-        <SidebarLink primary to={currentMenu ? `/qr-generator/${currentMenu._id}` : '/qr-generator'}>
-          <FiGrid />
-          QR Code
-        </SidebarLink>
-        <SidebarLink to="/settings">
-          <FiSettings />
-          Settings
-        </SidebarLink>
-      </Sidebar>
-
       <MainContent>
         {currentMenu && (
           <>
+            {/* Dashboard Overview Section */}
+            <DashboardOverview>
+              <OverviewTitle>
+                <FiBarChart2 />
+                Dashboard Overview
+              </OverviewTitle>
+              
+              {/* Menu Status Toggle */}
+              <MenuStatusToggle isOpen={currentMenu.isOpen}>
+                <StatusText>
+                  <StatusTitle isOpen={currentMenu.isOpen}>
+                    Menu is {currentMenu.isOpen ? 'Open' : 'Closed'}
+                  </StatusTitle>
+                  <StatusDescription>
+                    {currentMenu.isOpen
+                      ? 'Customers can view and order from your menu'
+                      : 'Your menu is hidden from customers'
+                    }
+                  </StatusDescription>
+                </StatusText>
+                <ToggleButton
+                  active={currentMenu.isOpen}
+                  onClick={handleToggleMenuStatus}
+                />
+              </MenuStatusToggle>
+
+              {/* Stats Grid */}
+              <StatsGrid>
+                <StatCard>
+                  <StatValue>{dashboardData.totalViews}</StatValue>
+                  <StatLabel>
+                    <FiEye />
+                    Total Views
+                  </StatLabel>
+                </StatCard>
+                <StatCard>
+                  <StatValue>{dashboardData.todayViews}</StatValue>
+                  <StatLabel>
+                    <FiCalendar />
+                    Today's Views
+                  </StatLabel>
+                </StatCard>
+                <StatCard>
+                  <StatValue>{dashboardData.weeklyOrders}</StatValue>
+                  <StatLabel>
+                    <FiTrendingUp />
+                    Weekly Orders
+                  </StatLabel>
+                </StatCard>
+                <StatCard>
+                  <StatValue>${dashboardData.monthlyRevenue}</StatValue>
+                  <StatLabel>
+                    <FiDollarSign />
+                    Monthly Revenue
+                  </StatLabel>
+                </StatCard>
+              </StatsGrid>
+
+              {/* Quick Actions */}
+              <QuickActionsGrid>
+                <QuickActionCard onClick={() => handleQuickAction('add-item')}>
+                  <QuickActionIcon>
+                    <FiPlus size={24} />
+                  </QuickActionIcon>
+                  <QuickActionTitle>Add Menu Item</QuickActionTitle>
+                  <QuickActionDescription>
+                    Add a new dish or beverage to your menu
+                  </QuickActionDescription>
+                </QuickActionCard>
+                
+                <QuickActionCard onClick={() => handleQuickAction('qr-code')}>
+                  <QuickActionIcon>
+                    <FiGrid size={24} />
+                  </QuickActionIcon>
+                  <QuickActionTitle>Generate QR Code</QuickActionTitle>
+                  <QuickActionDescription>
+                    Create and customize QR codes for your menu
+                  </QuickActionDescription>
+                </QuickActionCard>
+                
+                <QuickActionCard onClick={() => handleQuickAction('preview')}>
+                  <QuickActionIcon>
+                    <FiEye size={24} />
+                  </QuickActionIcon>
+                  <QuickActionTitle>Preview Menu</QuickActionTitle>
+                  <QuickActionDescription>
+                    See how your menu looks to customers
+                  </QuickActionDescription>
+                </QuickActionCard>
+                
+                <QuickActionCard onClick={() => handleQuickAction('settings')}>
+                  <QuickActionIcon>
+                    <FiSettings size={24} />
+                  </QuickActionIcon>
+                  <QuickActionTitle>Menu Settings</QuickActionTitle>
+                  <QuickActionDescription>
+                    Customize appearance and preferences
+                  </QuickActionDescription>
+                </QuickActionCard>
+              </QuickActionsGrid>
+            </DashboardOverview>
+
+            {/* Recent Activity Section */}
+            <RecentActivitySection>
+              <OverviewTitle>
+                <FiActivity />
+                Recent Activity
+              </OverviewTitle>
+              {dashboardData.recentActivity.map((activity, index) => {
+                const IconComponent = activity.icon;
+                return (
+                  <ActivityItem key={index}>
+                    <ActivityIcon>
+                      <IconComponent size={16} />
+                    </ActivityIcon>
+                    <ActivityContent>
+                      <ActivityText>{activity.text}</ActivityText>
+                      <ActivityTime>{activity.time}</ActivityTime>
+                    </ActivityContent>
+                  </ActivityItem>
+                );
+              })}
+            </RecentActivitySection>
+
             <MenuHeader>
               <MenuTitle>
                 {currentMenu.businessName}
